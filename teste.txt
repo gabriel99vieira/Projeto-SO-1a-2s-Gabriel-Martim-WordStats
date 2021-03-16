@@ -1,0 +1,6 @@
+teste.txt
+wordStats.sh
+
+olalal
+
+asdasd
