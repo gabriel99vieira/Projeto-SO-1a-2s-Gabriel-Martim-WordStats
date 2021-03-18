@@ -220,6 +220,8 @@ touch $WORDS_LF
 
 tr -d '\015' <$STOP_WORDS_FILE >$WORDS_LF
 
+STOP_WORDS_FILE=$WORDS_LF
+
 #
 # ────────────────────────────────────────────────────────────── BEFORE CODE ─────
 #
