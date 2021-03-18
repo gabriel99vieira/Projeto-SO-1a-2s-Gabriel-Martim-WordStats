@@ -146,7 +146,7 @@ if file_exists STOP_WORD_FILE; then
 else
     echo "File not found"
     #Creates the ISO file
-    > $STOP_WORD_FILE
+    # >$STOP_WORD_FILE
 fi
 
 filename=$(basename -- "$FILE")
@@ -185,13 +185,15 @@ case $MODE in
 "c")
     echo "STOPWORDS FILTERED"
     split_words $FILE | tr -d '.,«»;?' | awk NF | sort | grep -w -v -i -f $STOP_WORD_FILE | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
-    echo
+    ls -l $OUTPUT_FILE
+    echo "-------------------------------------"
     print_preview $OUTPUT_FILE 10
     ;;
 "C")
     echo "STOPWORDS IGNORED"
     split_words $FILE | tr -d '.,«»;?' | awk NF | sort | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
-    echo
+    ls -l $OUTPUT_FILE
+    echo "-------------------------------------"
     print_preview $OUTPUT_FILE 10
     ;;
 
@@ -213,9 +215,9 @@ case $MODE in
     ;;
 "T")
     echo "STOP WORDS will be counted"
-    echo "WORD_STATS_TOP =" $WORD_STATS_TOP 
+    echo "WORD_STATS_TOP =" $WORD_STATS_TOP
     split_words $FILE | sort | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
-    ls -l ./$OUTPUT_FILE
+    ls -l $OUTPUT_FILE
     echo "-------------------------------------"
     echo "# TOP $WORD_STATS_TOP elements"
     print_preview $OUTPUT_FILE $WORD_STATS_TOP
