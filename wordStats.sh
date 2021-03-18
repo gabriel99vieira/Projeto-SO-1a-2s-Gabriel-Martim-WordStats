@@ -139,12 +139,14 @@ else
     ISO="en"
     echo "ISO not defined. Default will be used ('$ISO')."
 fi
+
 STOP_WORD_FILE="$LANG_PATH/$ISO.$STOP_WORD_FILE"
 if file_exists STOP_WORD_FILE; then
     echo "Stop words file: $STOP_WORD_FILE."
 else
     echo "File not found"
-    # TODO caso não encontre criar ficheiro com caminho (LANG_PATH)
+    #Creates the ISO file
+    > $STOP_WORD_FILE
 fi
 
 filename=$(basename -- "$FILE")
