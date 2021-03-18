@@ -7,15 +7,20 @@
 # whatis uniq
 # whatis nl
 
-echo
-
 split_words() {
     for word in $(cat $1); do
         echo $word
     done
 }
 
-FILE="samples/sample.pt.txt"
+FILE="samples/test.txt"
 WORDS="lang/pt.stop_words.txt"
 
-split_words $FILE | tr -d '.,«»;?' | awk NF | tr -t '\r' '' | sort | grep -w -v -i -f $WORDS | uniq -c | sort -rn | cat -n
+touch .tmp_sw
+WORDS_LF=".tmp_sw"
+
+tr -d '\015' <$WORDS >$WORDS_LF
+
+split_words $FILE | sed $'s/\r$//' | tr -d '.,«»;?' | awk NF | tr -t '\r' '' | sort | grep -w -v -i -f $WORDS_LF | uniq -c | sort -rn | cat -n
+
+rm -f $WORDS_LF

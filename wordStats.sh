@@ -20,6 +20,9 @@ WORD_STATS_TOP=10
 # Default preview lenght
 PREVIEW_LENGHT=10
 
+# Input files
+WORDS_LF=".temp_sw"
+
 # Output file
 OUTPUT_FILE="results/result---"
 OUTPUT_FILE_FORMAT="txt"
@@ -44,7 +47,7 @@ FILE_TYPES["pdf"]="PDF"
 # USAGE: close
 close() {
     echo
-    echo "CLosing..."
+    echo "Closing..."
     exit 0
 }
 
@@ -212,6 +215,11 @@ if [ "${extension}" == "pdf" ]; then
     FILE=$OUTPUT_TEMP
 fi
 
+# Convert CRLF to LF EOL sequence to prevent bugs
+touch $WORDS_LF
+
+tr -d '\015' <$STOP_WORDS_FILE >$WORDS_LF
+
 #
 # ────────────────────────────────────────────────────────────── BEFORE CODE ─────
 #
@@ -286,6 +294,7 @@ esac
 
 # Removing the temporary PDF content file
 rm -f $OUTPUT_TEMP
+rm -f $WORDS_LF
 
 # Exiting the program
 close
