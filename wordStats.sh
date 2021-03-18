@@ -198,10 +198,21 @@ case $MODE in
     ;;
 
 "t")
-    echo "Top without stopwords"
+    echo "STOP WORDS will be filtered out"
+    split_words $FILE | sort | grep -w -v -i -f $STOP_WORD_FILE | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
+    ls -l $OUTPUT_FILE
+    echo "-------------------------------------"
+    echo "# TOP $WORD_STATS_TOP elements"
+    print_preview $OUTPUT_FILE $WORD_STATS_TOP
     ;;
 "T")
-    echo "Top with stopwords"
+    echo "STOP WORDS will be counted"
+    echo "WORD_STATS_TOP =" $WORD_STATS_TOP 
+    split_words $FILE | sort | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
+    ls -l ./$OUTPUT_FILE
+    echo "-------------------------------------"
+    echo "# TOP $WORD_STATS_TOP elements"
+    print_preview $OUTPUT_FILE $WORD_STATS_TOP
     ;;
 esac
 
