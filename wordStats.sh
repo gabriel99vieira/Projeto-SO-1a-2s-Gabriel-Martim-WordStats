@@ -48,7 +48,7 @@ close() {
     exit 0
 }
 
-# Verifies if a value exists in the array
+# Verifies if a value exists/is set in the array
 # USAGE: if in_array {parameter} in {array}; then ... fi
 in_array() {
     if [ "$2" != in ]; then
@@ -59,7 +59,7 @@ in_array() {
     eval '[[ " ${'"$3"'[@]} " =~ " ${'"$1"'} " ]]'
 }
 
-# Verifies if a index exists in the array
+# Verifies if a index exists/is set in the array
 # USAGE: if index_in_array {index} in {array}; then ... fi
 index_in_array() {
     if [ "$2" != in ]; then
