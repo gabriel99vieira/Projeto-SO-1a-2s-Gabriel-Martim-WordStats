@@ -27,6 +27,7 @@ STOP_WORDS=()
 # Output file
 OUTPUT_FILE="results/result---"
 OUTPUT_FILE_FORMAT="txt"
+OUTPUT_TEMP=".temp"
 
 # Allowed ISO format
 ISOS=("pt" "en")
@@ -101,7 +102,6 @@ clear
 # Evaluate inputs before proceed
 
 # Check if mode is permited
-# if [[ " ${MODES[@]} " =~ " ${MODE} " ]]; then
 if in_array MODE in MODES; then
     echo "Executing on mode '$MODE'."
 else
@@ -163,6 +163,12 @@ else
     touch "$OUTPUT_FILE"
 fi
 
+if [ "${extension}" == "pdf" ]; then
+    touch $OUTPUT_TEMP
+    pdftotext $FILE $OUTPUT_TEMP
+    FILE=$OUTPUT_TEMP
+fi
+
 unset filename
 unset extension
 
@@ -178,13 +184,13 @@ case $MODE in
 
 "c")
     echo "STOPWORDS FILTERED"
-    split_words $FILE | sort | grep -w -v -i -f $STOP_WORD_FILE | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
+    split_words $FILE | tr -d '.,«»;?' | awk NF | sort | grep -w -v -i -f $STOP_WORD_FILE | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
     echo
     print_preview $OUTPUT_FILE 10
     ;;
 "C")
     echo "STOPWORDS IGNORED"
-    split_words $FILE | sort | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
+    split_words $FILE | tr -d '.,«»;?' | awk NF | sort | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
     echo
     print_preview $OUTPUT_FILE 10
     ;;
@@ -226,4 +232,5 @@ esac
 # ───────────────────────────────────────────────────────────────── END CODE ─────
 #
 
+rm -f $OUTPUT_TEMP
 close
