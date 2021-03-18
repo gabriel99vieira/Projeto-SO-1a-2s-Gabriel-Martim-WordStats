@@ -39,9 +39,6 @@ declare -A FILE_TYPES
 FILE_TYPES["txt"]="Text"
 FILE_TYPES["pdf"]="PDF"
 
-# Words read
-declare -A WORDS
-
 #
 # ──────────────────────────────────────────────────────────────── FUNCTIONS ─────
 #
@@ -77,91 +74,18 @@ file_exists() {
     eval '[[ -f "${'"$1"'}" ]]'
 }
 
-# Prints array before sort
-print_array() {
-    for word in "${!WORDS[@]}"; do
-        printf "%s\t\t%s\n" "${WORDS[$word]}" "$word"
+split_words() {
+    for word in $(cat $1); do
+        echo $word
     done
 }
 
-# Sorts WORDS array by a given order
-sort_array() {
-    if [ "$1" == "" ]; then
-        echo "Incorrect usage."
-        echo "Set a direction asc desc."
-        return
+print_preview() {
+    eval 'head -$2 $1'
+    if [ "$(wc -l <"$1")" -gt "$2" ]; then
+        printf "\t\t%s" "(...)"
+        echo
     fi
-
-    case "${1}" in
-    "asc")
-        print_array | sort -n -k2
-        ;;
-    "desc")
-        print_array | sort -rn -k2
-        ;;
-    *)
-        echo "Direction not suported"
-        ;;
-    esac
-
-}
-
-prepare_print() {
-    count=0
-    jump=0
-    for line in $(eval $1); do
-        if [ $jump == 0 ]; then
-            jump=1
-            ((count = count + 1))
-            printf "\t%d\t\t%s" "$count" "$line"
-        else
-            jump=0
-            printf "\t%s\n" "$line"
-        fi
-    done
-
-    unset count
-    unset jump
-}
-
-# Reads the content of an input file path
-# Variable WORDS as output
-count_words() {
-    if [ "$1" == "" ]; then
-        echo "Incorrect usage."
-        echo "Input an existing file."
-        return
-    fi
-
-    WORDS=()
-    WORDS_LENGHT=0
-
-    for line in $(<$1); do
-        for word in $line; do
-            if $STOP_WORDS_STATUS; then
-                # Sorry the in_array function did not work with regex :(
-                if [[ "${STOP_WORDS[*]}" =~ ${word/$'\r'/} ]]; then
-                    continue
-                else
-                    if index_in_array word in WORDS; then
-                        ((WORDS["$word"] = WORDS["$word"] + 1))
-                    else
-                        ((WORDS_LENGHT = WORDS_LENGHT + 1))
-                        WORDS["$word"]=1
-                    fi
-                fi
-            else
-                if index_in_array word in WORDS; then
-                    ((WORDS["$word"] = WORDS["$word"] + 1))
-                else
-                    ((WORDS_LENGHT = WORDS_LENGHT + 1))
-                    WORDS["$word"]=1
-                fi
-            fi
-
-        done
-
-    done
 }
 
 #
@@ -251,16 +175,16 @@ echo
 case $MODE in
 
 "c")
-    echo "Stopwords filtered"
-    STOP_WORDS_STATUS=true
-    count_words "$FILE"
-    prepare_print 'sort_array "desc"' >$OUTPUT_FILE
-    STOP_WORDS_STATUS=false
+    echo "STOPWORDS FILTERED"
+    split_words $FILE | sort | grep -w -v -i -f $STOP_WORD_FILE | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
+    echo
+    print_preview $OUTPUT_FILE 10
     ;;
 "C")
-    echo "Stopwords ignored"
-    count_words "$FILE"
-    prepare_print 'sort_array "desc"' >$OUTPUT_FILE
+    echo "STOPWORDS IGNORED"
+    split_words $FILE | sort | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
+    echo
+    print_preview $OUTPUT_FILE 10
     ;;
 
 "p")
