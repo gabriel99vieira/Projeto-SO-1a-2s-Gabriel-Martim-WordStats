@@ -268,7 +268,7 @@ case $MODE in
 
 "t")
     echo "STOP WORDS will be filtered out"
-    split_words $FILE | sort | grep -w -v -i -f $STOP_WORDS_FILE | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
+    split_words $FILE | tr -d '.,«»;?' | awk NF | sort | grep -w -v -i -f $STOP_WORDS_FILE | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
     ls -l $OUTPUT_FILE
     echo "-------------------------------------"
     echo "# TOP $WORD_STATS_TOP elements"
@@ -277,7 +277,7 @@ case $MODE in
 "T")
     echo "STOP WORDS will be counted"
     echo "WORD_STATS_TOP =" $WORD_STATS_TOP
-    split_words $FILE | sort | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
+    split_words $FILE | tr -d '.,«»;?' | awk NF | sort | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
     ls -l $OUTPUT_FILE
     echo "-------------------------------------"
     echo "# TOP $WORD_STATS_TOP elements"
