@@ -119,6 +119,24 @@ print_preview() {
     fi
 }
 
+t_mode() {
+    #IF lower case (t) mode then saves the sort and grep command to remove stop words, else if upper case (T) mode then saves only the sort command
+    if [ "$MODE" == "t" ]; then
+        command="sort | grep -w -v -i -f $STOP_WORDS_FILE"
+        echo "STOP WORDS will be filtered out"
+    elif [ "$MODE" == "T" ]; then
+        command="sort"
+        echo "STOP WORDS will be counted"
+        echo "WORD_STATS_TOP =" $WORD_STATS_TOP
+    fi
+    
+    split_words $FILE | tr -d '.,«»;?' | awk NF | eval $command | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
+    ls -l $OUTPUT_FILE
+    echo "-------------------------------------"
+    echo "# TOP $WORD_STATS_TOP elements"
+    print_preview $OUTPUT_FILE $WORD_STATS_TOP
+}
+
 #
 # ───────────────────────────────────────────────────────────────────── BOOT ─────
 #
@@ -267,21 +285,11 @@ case $MODE in
     ;;
 
 "t")
-    echo "STOP WORDS will be filtered out"
-    split_words $FILE | tr -d '.,«»;?' | awk NF | sort | grep -w -v -i -f $STOP_WORDS_FILE | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
-    ls -l $OUTPUT_FILE
-    echo "-------------------------------------"
-    echo "# TOP $WORD_STATS_TOP elements"
-    print_preview $OUTPUT_FILE $WORD_STATS_TOP
+    t_mode
     ;;
+    
 "T")
-    echo "STOP WORDS will be counted"
-    echo "WORD_STATS_TOP =" $WORD_STATS_TOP
-    split_words $FILE | tr -d '.,«»;?' | awk NF | sort | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
-    ls -l $OUTPUT_FILE
-    echo "-------------------------------------"
-    echo "# TOP $WORD_STATS_TOP elements"
-    print_preview $OUTPUT_FILE $WORD_STATS_TOP
+    t_mode
     ;;
 
 esac
