@@ -119,17 +119,41 @@ print_preview() {
     fi
 }
 
+c_mode(){
+    # Checks what mode the user entered
+    if [ "$MODE" == "c" ]; then
+        echo "STOPWORDS FILTERED"
+        # Saves command to filter the stopwords
+        command="sort | grep -w -v -i -f $STOP_WORDS_FILE"
+    elif [ "$MODE" == "C" ]; then       
+        echo "STOPWORDS IGNORED"
+        # Saves command without the grep to ignore Stopwords
+        command="sort"
+    fi
+
+    # Results will be presented in a file
+    # Prints PREVIEW_LENGHT to console
+    split_words $FILE | tr -d '.,«»;?' | awk NF | eval $command | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
+    ls -l $OUTPUT_FILE
+    echo "-------------------------------------"
+    print_preview $OUTPUT_FILE $PREVIEW_LENGHT
+}
+
 t_mode() {
-    #IF lower case (t) mode then saves the sort and grep command to remove stop words, else if upper case (T) mode then saves only the sort command
+    # Checks what mode the user entered
     if [ "$MODE" == "t" ]; then
+        # Saves command to filter the stopwords
         command="sort | grep -w -v -i -f $STOP_WORDS_FILE"
         echo "STOP WORDS will be filtered out"
     elif [ "$MODE" == "T" ]; then
+        # Saves command without the grep to ignore Stopwords
         command="sort"
         echo "STOP WORDS will be counted"
         echo "WORD_STATS_TOP =" $WORD_STATS_TOP
     fi
     
+    # Results will be presented in a file
+    # Prints PREVIEW_LENGHT to console
     split_words $FILE | tr -d '.,«»;?' | awk NF | eval $command | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
     ls -l $OUTPUT_FILE
     echo "-------------------------------------"
@@ -257,23 +281,11 @@ echo
 case $MODE in
 
 "c")
-    # Stopwords filtered to and presented to a file
-    # Prints PREVIEW_LENGHT to console
-    echo "STOPWORDS FILTERED"
-    split_words $FILE | tr -d '.,«»;?' | awk NF | sort | grep -w -v -i -f $STOP_WORDS_FILE | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
-    ls -l $OUTPUT_FILE
-    echo "-------------------------------------"
-    print_preview $OUTPUT_FILE $PREVIEW_LENGHT
+    c_mode
     ;;
+    
 "C")
-    # Stopwords ignored and will be counted
-    # Results will be presented in a file
-    # Prints PREVIEW_LENGHT to console
-    echo "STOPWORDS IGNORED"
-    split_words $FILE | tr -d '.,«»;?' | awk NF | sort | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
-    ls -l $OUTPUT_FILE
-    echo "-------------------------------------"
-    print_preview $OUTPUT_FILE $PREVIEW_LENGHT
+    c_mode
     ;;
 
 "p")
