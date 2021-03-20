@@ -175,9 +175,9 @@ if in_array MODE in MODES; then
     echo "Executing on mode '$MODE'."
 else
     if [ "$MODE" = "" ]; then
-        echo "Mode required do execute."
+        echo "[ERROR] Mode required do execute [Cc|Pp|Tt]"
     else
-        echo "Mode '$MODE' is not implemented."
+        echo "[ERROR] unknown command '$MODE'"
     fi
     close
 fi
@@ -196,7 +196,7 @@ if file_exists FILE; then
         close
     fi
 else
-    echo "!!! Incorrect input file. $FILE"
+    echo "[ERROR] can't find file $FILE"
     close
 fi
 
@@ -280,11 +280,7 @@ unset extension
 echo
 case $MODE in
 
-"c")
-    c_mode
-    ;;
-    
-"C")
+"c" | "C")
     c_mode
     ;;
 
@@ -296,11 +292,7 @@ case $MODE in
     echo "Plot with stopwords"
     ;;
 
-"t")
-    t_mode
-    ;;
-    
-"T")
+"t" | "T")
     t_mode
     ;;
 
