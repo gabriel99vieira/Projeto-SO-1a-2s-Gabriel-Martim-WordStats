@@ -15,7 +15,7 @@ STOP_WORDS_FILE="stop_words.txt"
 LANG_PATH="./lang"
 
 # Stopwords related variables
-# WORD_STATS_TOP=10 # !!! Removido para obter a variável do ambiente (ver linhas +-217 a 220)
+# WORD_STATS_TOP=10 # !!! Changed to environment cariable (lines +-280)
 WORD_STATS_TOP_DEFAULT=10
 
 # Default preview lenght
@@ -43,6 +43,55 @@ FILE_TYPES["pdf"]="PDF"
 #
 # ──────────────────────────────────────────────────────────────── FUNCTIONS ─────
 #
+
+# Sets a color for the next console output
+# USAGE: color "red|green|blue|yellow|cyan" # to change color
+# USAGE: color # to reset
+color() {
+    case "${1}" in
+    "red")
+        echo -e -n "\e[31m"
+        ;;
+    "green")
+        echo -e -n "\e[92m"
+        ;;
+    "blue")
+        echo -e -n "\e[34m"
+        ;;
+    "yellow")
+        echo -e -n "\e[93m"
+        ;;
+    "cyan")
+        echo -e -n "\e[36m"
+        ;;
+    *)
+        echo -e -n "\e[39m"
+        ;;
+    esac
+    if [ "${1}" == "" ]; then
+        echo -e -n "\e[39m"
+    fi
+}
+
+# Prints a start log with the specified category name and respective color
+# USAGE: log "info|warn|error"
+log() {
+    case "${1}" in
+    "error")
+        color "red"
+        printf "[ERROR] "
+        ;;
+    "warn")
+        color "yellow"
+        printf "[WARN] "
+        ;;
+    "info")
+        color "cyan"
+        printf "[INFO] "
+        ;;
+    esac
+    color
+}
 
 # Exits the current execution with a message
 # USAGE: close
@@ -120,13 +169,16 @@ print_preview() {
     fi
 }
 
+# todo comment
 c_mode() {
     # Checks what mode the user entered
     if [ "$MODE" == "c" ]; then
+        log "info"
         echo "STOPWORDS FILTERED"
         # Saves command to filter the stopwords
         command="sort | grep -w -v -i -f $STOP_WORDS_FILE"
     elif [ "$MODE" == "C" ]; then
+        log "info"
         echo "STOPWORDS IGNORED"
         # Saves command without the grep to ignore Stopwords
         command="sort"
@@ -140,16 +192,20 @@ c_mode() {
     print_preview $OUTPUT_FILE $PREVIEW_LENGHT
 }
 
+# todo comment
 t_mode() {
     # Checks what mode the user entered
     if [ "$MODE" == "t" ]; then
         # Saves command to filter the stopwords
         command="sort | grep -w -v -i -f $STOP_WORDS_FILE"
-        echo "STOP WORDS will be filtered out"
+        log "info"
+        echo "STOPWORDS FILTERED"
     elif [ "$MODE" == "T" ]; then
         # Saves command without the grep to ignore Stopwords
         command="sort"
-        echo "STOP WORDS will be counted"
+        log "info"
+        echo "STOPWORDS IGNORED"
+        log "info"
         echo "WORD_STATS_TOP =" $WORD_STATS_TOP
     fi
 
@@ -168,17 +224,23 @@ t_mode() {
 
 clear
 
+echo "Starting..."
+echo
+
 # Evaluate inputs before proceed
 # In the following code bellow any value not properly assigned causes the program to exit
 
 # Check if mode is allowed
 if in_array MODE in MODES; then
-    echo "[INFO] Executing on mode '$MODE'."
+    log "info"
+    echo "Executing on mode '$MODE'."
 else
     if [ "$MODE" = "" ]; then
-        echo "[ERROR] Mode required do execute [C/c|P/p|T/t]"
+        log "error"
+        echo "Mode required do execute [C/c|P/p|T/t]"
     else
-        echo "[ERROR] unknown command '$MODE'"
+        log "error"
+        echo "unknown command '$MODE'"
     fi
     close
 fi
@@ -191,22 +253,27 @@ if file_exists FILE; then
 
     # check if file type is allowed
     if index_in_array extension in FILE_TYPES; then
-        echo "[INFO] Opening '$FILE' as ${FILE_TYPES[${extension}]} file."
+        log "info"
+        echo "Opening '$FILE' as ${FILE_TYPES[${extension}]} file."
     else
-        echo "[ERROR] File extension '$extension' not allowed."
+        log "error"
+        echo "File extension '$extension' not allowed."
         close
     fi
 else
-    echo "[ERROR] File '$FILE' not found!"
+    log "error"
+    echo "File '$FILE' not found!"
     close
 fi
 
 # Check if ISO is suported, else use default "en"
 if in_array ISO in ISOS; then
-    echo "[INFO] ISO format: '$ISO'."
+    log "info"
+    echo "ISO format: '$ISO'."
 else
     ISO="en"
-    echo "[WARN] ISO not defined. Default will be used ('$ISO')."
+    log "warn"
+    echo "ISO not defined. Default will be used ('$ISO')."
 fi
 
 #
@@ -221,19 +288,23 @@ fi
 if [ "$(printenv WORD_STATS_TOP)" == "" ]; then
     WORD_STATS_TOP=WORD_STATS_TOP_DEFAULT
     export WORD_STATS_TOP
-    echo "[WARN] 'WORD_STATS_TOP' not defined. Default used ($WORD_STATS_TOP_DEFAULT)"
+    log "warn"
+    echo "'WORD_STATS_TOP' not defined. Default used ($WORD_STATS_TOP_DEFAULT)"
 else
     WORD_STATS_TOP=$(printenv WORD_STATS_TOP)
-    echo "[INFO] 'WORD_STATS_TOP': $WORD_STATS_TOP"
+    log "info"
+    echo "'WORD_STATS_TOP': $WORD_STATS_TOP"
 fi
 
 # Sets the STOP_WORDS_FILE path and checks its existance
 # In case it doesn't exist, one is created empty and a warning pops up
 STOP_WORDS_FILE="$LANG_PATH/$ISO.$STOP_WORDS_FILE"
 if file_exists STOP_WORDS_FILE; then
-    echo "[INFO] Stop words file: $STOP_WORDS_FILE."
+    log "info"
+    echo "Stop words file: $STOP_WORDS_FILE."
 else
-    echo "[WARN] Stop words file not found ... creating empty"
+    log "warn"
+    echo "Stop words file not found ... creating empty"
     # Creates the ISO file
     touch $STOP_WORDS_FILE
 fi
@@ -249,11 +320,13 @@ OUTPUT_FILE="$OUTPUT_FILE$filename.$OUTPUT_FILE_FORMAT"
 # In case it exists warns that it will be overwritten
 # If it doesn't exist, one will be created
 if file_exists OUTPUT_FILE; then
-    echo "[WARN] Output file will be overwritten: '$OUTPUT_FILE'"
+    log "warn"
+    echo "Output file will be overwritten: '$OUTPUT_FILE'"
     true >"$OUTPUT_FILE"
     touch "$OUTPUT_FILE"
 else
-    echo "[INFO] Creating new output file: '$OUTPUT_FILE'"
+    log "info"
+    echo "Creating new output file: '$OUTPUT_FILE'"
     touch "$OUTPUT_FILE"
 fi
 
@@ -288,6 +361,7 @@ unset extension
 # ───────────────────────────────────────────────────────────────────── CODE ─────
 #
 
+echo
 echo "Executing..."
 echo
 case $MODE in
