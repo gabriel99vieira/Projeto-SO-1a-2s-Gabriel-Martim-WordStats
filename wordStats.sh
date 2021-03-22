@@ -17,6 +17,7 @@ LANG_PATH="./lang"
 # Stopwords related variables
 # WORD_STATS_TOP=10 # !!! Changed to environment cariable (lines +-280)
 WORD_STATS_TOP_DEFAULT=10
+printenv | grep WORD_STATS_TOP
 
 # Default preview lenght
 PREVIEW_LENGHT=10
@@ -285,13 +286,11 @@ fi
 # Evaluates if Environment variable WORD_STATS_TOP is assigned
 #       If assigned then proceeds the normal execution
 #       Else warn pops up in console and a default is assigned by WORD_STATS_TOP_DEFAULT variable
-if [ "$(printenv WORD_STATS_TOP)" == "" ]; then
-    WORD_STATS_TOP=WORD_STATS_TOP_DEFAULT
-    export WORD_STATS_TOP
+if [ "$WORD_STATS_TOP" == "" ]; then
+    export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
     log "warn"
     echo "'WORD_STATS_TOP' not defined. Default used ($WORD_STATS_TOP_DEFAULT)"
 else
-    WORD_STATS_TOP=$(printenv WORD_STATS_TOP)
     log "info"
     echo "'WORD_STATS_TOP': $WORD_STATS_TOP"
 fi
