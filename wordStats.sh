@@ -15,7 +15,8 @@ STOP_WORDS_FILE="stop_words.txt"
 LANG_PATH="./lang"
 
 # Stopwords related variables
-WORD_STATS_TOP=10
+# WORD_STATS_TOP=10 # !!! Removido para obter a variável do ambiente (ver linhas +-217 a 220)
+WORD_STATS_TOP_DEFAULT=10
 
 # Default preview lenght
 PREVIEW_LENGHT=10
@@ -119,13 +120,13 @@ print_preview() {
     fi
 }
 
-c_mode(){
+c_mode() {
     # Checks what mode the user entered
     if [ "$MODE" == "c" ]; then
         echo "STOPWORDS FILTERED"
         # Saves command to filter the stopwords
         command="sort | grep -w -v -i -f $STOP_WORDS_FILE"
-    elif [ "$MODE" == "C" ]; then       
+    elif [ "$MODE" == "C" ]; then
         echo "STOPWORDS IGNORED"
         # Saves command without the grep to ignore Stopwords
         command="sort"
@@ -151,7 +152,7 @@ t_mode() {
         echo "STOP WORDS will be counted"
         echo "WORD_STATS_TOP =" $WORD_STATS_TOP
     fi
-    
+
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
     split_words $FILE | tr -d '.,«»;?' | awk NF | eval $command | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
@@ -172,10 +173,10 @@ clear
 
 # Check if mode is allowed
 if in_array MODE in MODES; then
-    echo "Executing on mode '$MODE'."
+    echo "[INFO] Executing on mode '$MODE'."
 else
     if [ "$MODE" = "" ]; then
-        echo "[ERROR] Mode required do execute [Cc|Pp|Tt]"
+        echo "[ERROR] Mode required do execute [C/c|P/p|T/t]"
     else
         echo "[ERROR] unknown command '$MODE'"
     fi
@@ -190,22 +191,22 @@ if file_exists FILE; then
 
     # check if file type is allowed
     if index_in_array extension in FILE_TYPES; then
-        echo "Opening '$FILE' as ${FILE_TYPES[${extension}]} file."
+        echo "[INFO] Opening '$FILE' as ${FILE_TYPES[${extension}]} file."
     else
-        echo "!!! File extension '$extension' not allowed."
+        echo "[ERROR] File extension '$extension' not allowed."
         close
     fi
 else
-    echo "[ERROR] can't find file $FILE"
+    echo "[ERROR] File '$FILE' not found!"
     close
 fi
 
 # Check if ISO is suported, else use default "en"
 if in_array ISO in ISOS; then
-    echo "ISO format: '$ISO'."
+    echo "[INFO] ISO format: '$ISO'."
 else
     ISO="en"
-    echo "ISO not defined. Default will be used ('$ISO')."
+    echo "[WARN] ISO not defined. Default will be used ('$ISO')."
 fi
 
 #
@@ -214,13 +215,25 @@ fi
 #       File exists and its type is supported
 #
 
+# Evaluates if Environment variable WORD_STATS_TOP is assigned
+#       If assigned then proceeds the normal execution
+#       Else warn pops up in console and a default is assigned by WORD_STATS_TOP_DEFAULT variable
+if [ "$(printenv WORD_STATS_TOP)" == "" ]; then
+    WORD_STATS_TOP=WORD_STATS_TOP_DEFAULT
+    export WORD_STATS_TOP
+    echo "[WARN] 'WORD_STATS_TOP' not defined. Default used ($WORD_STATS_TOP_DEFAULT)"
+else
+    WORD_STATS_TOP=$(printenv WORD_STATS_TOP)
+    echo "[INFO] 'WORD_STATS_TOP': $WORD_STATS_TOP"
+fi
+
 # Sets the STOP_WORDS_FILE path and checks its existance
 # In case it doesn't exist, one is created empty and a warning pops up
 STOP_WORDS_FILE="$LANG_PATH/$ISO.$STOP_WORDS_FILE"
 if file_exists STOP_WORDS_FILE; then
-    echo "Stop words file: $STOP_WORDS_FILE."
+    echo "[INFO] Stop words file: $STOP_WORDS_FILE."
 else
-    echo "!!! Stop words file not found ... creating empty"
+    echo "[WARN] Stop words file not found ... creating empty"
     # Creates the ISO file
     touch $STOP_WORDS_FILE
 fi
@@ -236,11 +249,11 @@ OUTPUT_FILE="$OUTPUT_FILE$filename.$OUTPUT_FILE_FORMAT"
 # In case it exists warns that it will be overwritten
 # If it doesn't exist, one will be created
 if file_exists OUTPUT_FILE; then
-    echo "!!! Output file will be overwritten: '$OUTPUT_FILE'"
+    echo "[WARN] Output file will be overwritten: '$OUTPUT_FILE'"
     true >"$OUTPUT_FILE"
     touch "$OUTPUT_FILE"
 else
-    echo "Creating new output file: '$OUTPUT_FILE'"
+    echo "[INFO] Creating new output file: '$OUTPUT_FILE'"
     touch "$OUTPUT_FILE"
 fi
 
@@ -259,9 +272,7 @@ fi
 
 # Convert CRLF to LF EOL sequence to prevent bugs
 touch $WORDS_LF
-
 tr -d '\015' <$STOP_WORDS_FILE >$WORDS_LF
-
 STOP_WORDS_FILE=$WORDS_LF
 
 #
@@ -277,6 +288,7 @@ unset extension
 # ───────────────────────────────────────────────────────────────────── CODE ─────
 #
 
+echo "Executing..."
 echo
 case $MODE in
 
@@ -298,7 +310,9 @@ case $MODE in
 
 esac
 
-# ────────────────────────────────────────────────────────────────────────────────
+#
+# ───────────────────────────────────────────────────────────────── END CODE ─────
+#
 
 #
 # ────────────────────────────────────────────────────────────────── CLOSING ─────
@@ -313,6 +327,4 @@ rm -f $WORDS_LF
 # Exiting the program
 close
 
-#
-# ───────────────────────────────────────────────────────────────── END CODE ─────
-#
+# ────────────────────────────────────────────────────────────────────────────────
