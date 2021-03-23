@@ -193,7 +193,7 @@ c_mode() {
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
-    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
+    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
     unset cmd
     ls -lah $OUTPUT_FILE
     echo "-------------------------------------"
@@ -220,7 +220,7 @@ t_mode() {
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
-    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
+    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
     unset cmd
     ls -lah $OUTPUT_FILE
     echo "-------------------------------------"
