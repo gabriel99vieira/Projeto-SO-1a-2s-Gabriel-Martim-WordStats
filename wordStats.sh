@@ -13,6 +13,7 @@ ISO=$3
 # Example pt.stop_words.txt
 STOP_WORDS_FILE="stop_words.txt"
 LANG_PATH="./lang"
+EXTRA_CHARS='.,]:«}#/»=\;"(*<>)|?{•–[-'
 
 # Stopwords related variables
 # WORD_STATS_TOP=10 # !!! Changed to environment cariable (lines +-280)
@@ -89,6 +90,10 @@ log() {
     "info")
         color "cyan"
         printf "[INFO] "
+        ;;
+    "exec")
+        color "green"
+        printf "[EXEC] "
         ;;
     esac
     color
@@ -173,22 +178,24 @@ print_preview() {
 # todo comment
 c_mode() {
     # Checks what mode the user entered
+    cmd=""
     if [ "$MODE" == "c" ]; then
-        log "info"
+        log "exec"
         echo "STOPWORDS FILTERED"
         # Saves command to filter the stopwords
-        command="sort | grep -w -v -i -f $STOP_WORDS_FILE"
+        cmd="sort | grep -w -v -i -f $STOP_WORDS_FILE"
     elif [ "$MODE" == "C" ]; then
-        log "info"
+        log "exec"
         echo "STOPWORDS IGNORED"
         # Saves command without the grep to ignore Stopwords
-        command="sort"
+        cmd="sort"
     fi
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
-    split_words $FILE | tr -d '.,«»;?' | awk NF | eval $command | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
-    ls -l $OUTPUT_FILE
+    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c | sort -rn | cat -n >$OUTPUT_FILE
+    unset cmd
+    ls -lah $OUTPUT_FILE
     echo "-------------------------------------"
     print_preview $OUTPUT_FILE $PREVIEW_LENGHT
 }
@@ -196,27 +203,47 @@ c_mode() {
 # todo comment
 t_mode() {
     # Checks what mode the user entered
+    cmd=""
     if [ "$MODE" == "t" ]; then
         # Saves command to filter the stopwords
-        command="sort | grep -w -v -i -f $STOP_WORDS_FILE"
-        log "info"
+        cmd="sort | grep -w -v -i -f $STOP_WORDS_FILE"
+        log "exec"
         echo "STOPWORDS FILTERED"
     elif [ "$MODE" == "T" ]; then
         # Saves command without the grep to ignore Stopwords
-        command="sort"
-        log "info"
+        cmd="sort"
+        log "exec"
         echo "STOPWORDS IGNORED"
-        log "info"
+        log "exec"
         echo "WORD_STATS_TOP =" $WORD_STATS_TOP
     fi
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
-    split_words $FILE | tr -d '.,«»;?' | awk NF | eval $command | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
-    ls -l $OUTPUT_FILE
+    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c | sort -rn | cat -n | sed -n 1,"$WORD_STATS_TOP"p >$OUTPUT_FILE
+    unset cmd
+    ls -lah $OUTPUT_FILE
     echo "-------------------------------------"
     echo "# TOP $WORD_STATS_TOP elements"
     print_preview $OUTPUT_FILE $WORD_STATS_TOP
+}
+
+# todo comment
+p_mode() {
+    log "exec"
+    echo "p/P MODE YEY!"
+    # cmd=""
+    # if [ "$MODE" == "p" ]; then
+    #     # Saves command to filter the stopwords
+    #     cmd="sort | grep -w -v -i -f $STOP_WORDS_FILE"
+    #     log "info"
+    #     echo "STOPWORDS FILTERED"
+    # elif [ "$MODE" == "P" ]; then
+    #     # Saves command without the grep to ignore Stopwords
+    #     cmd="sort"
+    #     log "info"
+    #     echo "STOPWORDS IGNORED"
+    # fi
 }
 
 #
@@ -300,12 +327,12 @@ fi
 STOP_WORDS_FILE="$LANG_PATH/$ISO.$STOP_WORDS_FILE"
 if file_exists STOP_WORDS_FILE; then
     log "info"
-    echo "Stop words file: $STOP_WORDS_FILE."
+    echo "Stop words file: $STOP_WORDS_FILE. ($(wc -l <$STOP_WORDS_FILE))"
 else
-    log "warn"
-    echo "Stop words file not found ... creating empty"
     # Creates the ISO file
     touch $STOP_WORDS_FILE
+    log "warn"
+    echo "Stop words file not found ... creating empty"
 fi
 
 # Sets the 'filename' variable the same as input
@@ -338,7 +365,7 @@ fi
 # Converting PDF contents into Text
 if [ "${extension}" == "pdf" ]; then
     touch $OUTPUT_TEMP
-    pdftotext $FILE $OUTPUT_TEMP
+    pdftotext -layout $FILE $OUTPUT_TEMP
     FILE=$OUTPUT_TEMP
 fi
 
@@ -369,14 +396,9 @@ case $MODE in
     c_mode
     ;;
 
-"p")
-    echo "Plot without stopwords"
+"p" | "P")
+    p_mode
     ;;
-
-"P")
-    echo "Plot with stopwords"
-    ;;
-
 "t" | "T")
     t_mode
     ;;
