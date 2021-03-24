@@ -240,7 +240,7 @@ plot() {
     gnuplot <"$GNU_PLOT_TEMP_FILE"
 
     echo "<html><img src=\"./$GNU_PLOT_OUTPUT\"></html>" >$GNU_PLOT_OUTPUT_HTML
-    xdg-open $GNU_PLOT_OUTPUT >/dev/null 2>&1
+    xdg-open $GNU_PLOT_OUTPUT >/dev/null 2>&1 &
 }
 
 # todo comment
