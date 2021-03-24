@@ -18,7 +18,12 @@ EXTRA_CHARS='.,]:«}#/»=\;"(*<>)|?{•–[-'
 # Stopwords related variables
 # WORD_STATS_TOP=10 # !!! Changed to environment cariable (lines +-280)
 WORD_STATS_TOP_DEFAULT=10
-printenv | grep WORD_STATS_TOP
+WORD_STATS_TOP=$(printenv WORD_STATS_TOP)
+
+#GNUPlot
+GNU_PLOT_TEMP_FILE=".temp_plot"
+GNU_PLOT_OUTPUT=".png"
+GNU_PLOT_OUTPUT_HTML=".html"
 
 # Default preview lenght
 PREVIEW_LENGHT=10
@@ -29,7 +34,7 @@ WORDS_LF=".temp_sw"
 # Output file
 OUTPUT_FILE="results/result---"
 OUTPUT_FILE_FORMAT="txt"
-OUTPUT_TEMP=".temp"
+OUTPUT_TEMP=".temp_out"
 
 # Allowed ISOs
 ISOS=("pt" "en")
@@ -81,19 +86,19 @@ log() {
     case "${1}" in
     "error")
         color "red"
-        printf "[ERROR] "
+        printf "[ERROR]\t"
         ;;
     "warn")
         color "yellow"
-        printf "[WARN] "
+        printf "[WARN]\t"
         ;;
     "info")
         color "cyan"
-        printf "[INFO] "
+        printf "[INFO]\t"
         ;;
     "exec")
         color "green"
-        printf "[EXEC] "
+        printf "[EXEC]\t"
         ;;
     esac
     color
@@ -129,13 +134,40 @@ index_in_array() {
     eval '[ '"$3"'["'"$1"'"] ]'
 }
 
+# Verifies if input is number
+# WARNING: function input must be string format (for variables)
+# USAGE: if is_number $NUMBER; then ... fi
+is_number() {
+    if [ "$1" == "" ]; then
+        log "error"
+        echo "Incorrect usage of 'is_number'. 1st argument required."
+        close
+    fi
+
+    if [[ $1 =~ ^[+-]?[0-9]+$ ]]; then
+        return 0
+
+    elif [[ $1 =~ ^[+-]?[0-9]+\.?[0-9]*$ ]]; then
+        return 0
+    fi
+    return 1
+}
+
+# todo comment
+is_capital() {
+    if [[ $1 =~ [A-Z] ]]; then
+        return 0
+    fi
+    return 1
+}
+
 # Verifies if a file exists
 # USAGE: if file_exists FILE_PATH; then ... fi
 file_exists() {
     if [ "$1" == "" ]; then
-        echo "!!! Incorrect usage of 'file_exists'."
-        echo "A file path must be passed."
-        return
+        log "error"
+        echo "Incorrect usage of 'file_exists'. 1st argument required."
+        close
     fi
     eval '[[ -f "${'"$1"'}" ]]'
 }
@@ -173,6 +205,42 @@ print_preview() {
         printf "\t\t%s" "(...)"
         echo
     fi
+}
+
+# todo comment
+# todo refactor
+plot() {
+
+    GNU_PLOT_OUTPUT=$OUTPUT_FILE$GNU_PLOT_OUTPUT
+    GNU_PLOT_OUTPUT_HTML=$OUTPUT_FILE$GNU_PLOT_OUTPUT_HTML
+
+    if ! file_exists GNU_PLOT_TEMP_FILE; then
+        touch $GNU_PLOT_TEMP_FILE
+    fi
+    true >$GNU_PLOT_TEMP_FILE
+    {
+        if is_capital $MODE; then
+            echo "set title \"Top words for $FILE\n$(date +'%A %B %Y %H:%M')\nStopwords: Yes ($ISO)\""
+        else
+            echo "set title \"Top words for $FILE\n$(date +'%A %B %Y %H:%M')\nStopwords: No\""
+        fi
+        echo "set terminal png"
+        echo "set autoscale y"
+        echo "set output \"$GNU_PLOT_OUTPUT\""
+        echo "set boxwidth 0.6"
+        echo "set style fill solid"
+        echo "set xlabel \"Words\" font \"bold\""
+        echo "set xtics rotate by -45"
+        echo "set ylabel \"Quantity\" font \"bold\""
+        # echo "set ytics 1"
+        echo "set grid ytics linestyle 1 linecolor rgb \"#e6e6e6\""
+        echo "set key top"
+        echo "plot \"$OUTPUT_FILE\" using 1:2:xtic(3) with boxes title 'Occurrences' linecolor rgb \"#3399ff\""
+    } >"$GNU_PLOT_TEMP_FILE"
+    gnuplot <"$GNU_PLOT_TEMP_FILE"
+
+    echo "<html><img src=\"./$GNU_PLOT_OUTPUT\"></html>" >$GNU_PLOT_OUTPUT_HTML
+    xdg-open $GNU_PLOT_OUTPUT >/dev/null 2>&1
 }
 
 # todo comment
@@ -224,26 +292,19 @@ t_mode() {
     unset cmd
     ls -lah $OUTPUT_FILE
     echo "-------------------------------------"
-    echo "# TOP $WORD_STATS_TOP elements"
+    echo " # TOP $WORD_STATS_TOP elements"
     print_preview $OUTPUT_FILE $WORD_STATS_TOP
 }
 
 # todo comment
 p_mode() {
-    log "exec"
-    echo "p/P MODE YEY!"
-    # cmd=""
-    # if [ "$MODE" == "p" ]; then
-    #     # Saves command to filter the stopwords
-    #     cmd="sort | grep -w -v -i -f $STOP_WORDS_FILE"
-    #     log "info"
-    #     echo "STOPWORDS FILTERED"
-    # elif [ "$MODE" == "P" ]; then
-    #     # Saves command without the grep to ignore Stopwords
-    #     cmd="sort"
-    #     log "info"
-    #     echo "STOPWORDS IGNORED"
-    # fi
+    if [ "$MODE" == "p" ]; then
+        MODE="t"
+    elif [ "$MODE" == "P" ]; then
+        MODE="T"
+    fi
+    t_mode
+    plot
 }
 
 #
@@ -263,7 +324,7 @@ if in_array MODE in MODES; then
     log "info"
     echo "Executing on mode '$MODE'."
 else
-    if [ "$MODE" = "" ]; then
+    if [ -n "${MODE}" ]; then
         log "error"
         echo "Mode required do execute [C/c|P/p|T/t]"
     else
@@ -273,7 +334,7 @@ else
     close
 fi
 
-# Check if file exists and the extension is allowed/supported
+# Check if file exists (and different than "") and the extension is allowed/supported
 if file_exists FILE; then
 
     # get file extension
@@ -290,7 +351,11 @@ if file_exists FILE; then
     fi
 else
     log "error"
-    echo "File '$FILE' not found!"
+    if [ -n "${FILE}" ]; then
+        echo "File not provided."
+    else
+        echo "File '$FILE' not found!"
+    fi
     close
 fi
 
@@ -313,13 +378,19 @@ fi
 # Evaluates if Environment variable WORD_STATS_TOP is assigned
 #       If assigned then proceeds the normal execution
 #       Else warn pops up in console and a default is assigned by WORD_STATS_TOP_DEFAULT variable
-if [ "$WORD_STATS_TOP" == "" ]; then
+if [ "${WORD_STATS_TOP}" == "" ]; then
     export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
     log "warn"
-    echo "'WORD_STATS_TOP' not defined. Default used ($WORD_STATS_TOP_DEFAULT)"
+    echo "WORD_STATS_TOP not defined. Default used ($WORD_STATS_TOP_DEFAULT)"
 else
-    log "info"
-    echo "'WORD_STATS_TOP': $WORD_STATS_TOP"
+    if is_number $WORD_STATS_TOP; then
+        log "info"
+        echo "WORD_STATS_TOP: $WORD_STATS_TOP"
+    else
+        export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
+        log "warn"
+        echo "WORD_STATS_TOP not a number. Default used ($WORD_STATS_TOP_DEFAULT)"
+    fi
 fi
 
 # Sets the STOP_WORDS_FILE path and checks its existance
@@ -418,6 +489,7 @@ esac
 # Removing the temporary PDF content file
 rm -f $OUTPUT_TEMP
 rm -f $WORDS_LF
+rm -f $GNU_PLOT_TEMP_FILE
 
 # Exiting the program
 close
