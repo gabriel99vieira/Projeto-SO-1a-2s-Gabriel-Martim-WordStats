@@ -219,11 +219,14 @@ plot() {
     fi
     true >$GNU_PLOT_TEMP_FILE
     {
+        stpwords=""
         if is_capital $MODE; then
-            echo "set title \"Top words for $FILE\n$(date +'%A %B %Y %H:%M')\nStopwords: Yes ($ISO)\""
+            stpwords="No"
         else
-            echo "set title \"Top words for $FILE\n$(date +'%A %B %Y %H:%M')\nStopwords: No\""
+            stpwords="Yes ($ISO)"
         fi
+
+        echo "set title \"Top words for $FILE\n$(date +'%A %B %Y %H:%M')\nStopwords: $stpwords\""
         echo "set terminal png"
         echo "set autoscale y"
         echo "set output \"$GNU_PLOT_OUTPUT\""
@@ -237,10 +240,21 @@ plot() {
         echo "set key top"
         echo "plot \"$OUTPUT_FILE\" using 1:2:xtic(3) with boxes title 'Occurrences' linecolor rgb \"#3399ff\""
     } >"$GNU_PLOT_TEMP_FILE"
+    unset stpwords
+
     gnuplot <"$GNU_PLOT_TEMP_FILE"
 
-    echo "<html><img src=\"./$GNU_PLOT_OUTPUT\"></html>" >$GNU_PLOT_OUTPUT_HTML
+    {
+        echo "<html><div "
+        echo "style=\"display: block; margin-left: auto; margin-right: auto; width: 40%; margin-top: 5%;"
+        echo "><img src=\"./../$GNU_PLOT_OUTPUT\"></div></html>"
+    } >$GNU_PLOT_OUTPUT_HTML
+
+    echo
+    log "info"
+    echo "Opening preview..."
     xdg-open $GNU_PLOT_OUTPUT >/dev/null 2>&1 &
+
 }
 
 # todo comment
