@@ -372,8 +372,8 @@ t_mode() {
         # Saves command without the grep to ignore Stopwords
         cmd="sort"
         log "exec" "STOPWORDS IGNORED"
-        log "exec" "WORD_STATS_TOP =" $WORD_STATS_TOP
     fi
+    log "exec" "WORD_STATS_TOP = $WORD_STATS_TOP"
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
