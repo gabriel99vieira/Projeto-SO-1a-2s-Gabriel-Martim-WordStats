@@ -207,7 +207,13 @@ index_in_array() {
         log "error" "Incorrect usage of 'index_in_array'. Correct usage: in_array {key} in {array}"
         return
     fi
-    eval '[ '"$3"'["'"$1"'"] ]'
+    if string_empty "$1"; then
+        log "error" "Incorrect usage of 'index_in_array'. 1st argument required."
+        close
+    fi
+    eval '[ ${'"$3"'[$1]} ]'
+    # eval '[ '"$3"'["'"$1"'"] ]'
+
 }
 
 # Verifies if a file exists
@@ -433,26 +439,23 @@ else
 fi
 
 # Check if file exists (and different than "") and the extension is allowed/supported
-if file_exists FILE; then
-
-    # get file extension
+if string_empty "$FILE"; then
+    log "error" "File not provided."
+    close
+else
     extension="${FILE##*.}"
-
-    # check if file type is allowed
-    if index_in_array extension in FILE_TYPES; then
-        log "info" "Opening '$FILE' as ${FILE_TYPES[${extension}]} file."
+    if index_in_array "$extension" in FILE_TYPES; then
+        if file_exists FILE; then
+            # get file extension
+            log "info" "Opening '$FILE' as ${FILE_TYPES[${extension}]} file."
+        else
+            log "error" "File '$FILE' not found!"
+            close
+        fi
     else
         log "error" "File extension '$extension' not allowed."
         close
     fi
-else
-    log "error"
-    if [ -n "${FILE}" ]; then
-        echo "File not provided."
-    else
-        echo "File '$FILE' not found!"
-    fi
-    close
 fi
 
 # Check if ISO is suported, else use default "en"
@@ -468,21 +471,6 @@ fi
 #       ISO is correct and enabled in the ISOS array
 #       File exists and its type is supported
 #
-
-# Evaluates if Environment variable WORD_STATS_TOP is assigned
-#       If assigned then proceeds the normal execution
-#       Else warn pops up in console and a default is assigned by WORD_STATS_TOP_DEFAULT variable
-if string_empty "$WORD_STATS_TOP"; then
-    export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
-    log "warn" "WORD_STATS_TOP: undefined (default :$WORD_STATS_TOP_DEFAULT)"
-else
-    if is_number $WORD_STATS_TOP; then
-        log "info" "WORD_STATS_TOP: $WORD_STATS_TOP"
-    else
-        export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
-        log "warn" "WORD_STATS_TOP not a number. Default used ($WORD_STATS_TOP_DEFAULT)"
-    fi
-fi
 
 # Sets the STOP_WORDS_FILE path and checks its existance
 # In case it doesn't exist, one is created empty and a warning pops up
@@ -512,6 +500,21 @@ if file_exists OUTPUT_FILE; then
 else
     log "info" "Creating new output file: '$OUTPUT_FILE'"
     touch "$OUTPUT_FILE"
+fi
+
+# Evaluates if Environment variable WORD_STATS_TOP is assigned
+#       If assigned then proceeds the normal execution
+#       Else warn pops up in console and a default is assigned by WORD_STATS_TOP_DEFAULT variable
+if string_empty "$WORD_STATS_TOP"; then
+    export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
+    log "warn" "WORD_STATS_TOP: undefined (default :$WORD_STATS_TOP_DEFAULT)"
+else
+    if is_number $WORD_STATS_TOP && ((WORD_STATS_TOP > 0)); then
+        log "info" "WORD_STATS_TOP: $WORD_STATS_TOP"
+    else
+        export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
+        log "warn" "WORD_STATS_TOP not valid. Default used ($WORD_STATS_TOP_DEFAULT)"
+    fi
 fi
 
 #
