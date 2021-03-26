@@ -213,7 +213,6 @@ index_in_array() {
     fi
     eval '[ ${'"$3"'[$1]} ]'
     # eval '[ '"$3"'["'"$1"'"] ]'
-
 }
 
 # Verifies if a file exists
@@ -284,7 +283,7 @@ word_stats_top_validate() {
 }
 
 # Processes the t_mode function into a png plot.
-# If this function does not work it means you have change the code and don't know what you're doing.
+# If this function does not work it means you have changed the code and don't know what you're doing.
 # Variables bellow must be correcly implemented as example
 # GNU_PLOT_OUTPUT=".png"
 # GNU_PLOT_OUTPUT_HTML=".html"
@@ -293,7 +292,6 @@ word_stats_top_validate() {
 # ORIGINAL_INPUT=$FILE
 # OUTPUT_FILE="results/result---"
 plot() {
-
     # Defines path variables to working files
     GNU_PLOT_OUTPUT=$OUTPUT_FILE$GNU_PLOT_OUTPUT
     GNU_PLOT_OUTPUT_HTML=$OUTPUT_FILE$GNU_PLOT_OUTPUT_HTML
