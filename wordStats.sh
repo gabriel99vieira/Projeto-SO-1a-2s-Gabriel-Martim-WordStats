@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Scripted by
-# Gabriel Vieira - 2200661 - Student at IPL - ESTG - Computer Engineering
-# Martim Silva - 2200661 - Student at IPL - ESTG - Computer Engineering
+# Gabriel Madeira Vieira - 2200661 - Student at IPL - ESTG - Computer Engineering
+# Martim Teixeira da Silva - 2200681 - Student at IPL - ESTG - Computer Engineering
 # Operative Systems Project
 
 #
