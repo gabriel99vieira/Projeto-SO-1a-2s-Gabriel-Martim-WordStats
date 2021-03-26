@@ -258,6 +258,31 @@ print_preview() {
     fi
 }
 
+# Evaluates if Environment variable WORD_STATS_TOP is assigned
+# If assigned then proceeds the normal execution
+# Else warn pops up in console and a default is assigned by WORD_STATS_TOP_DEFAULT variable
+word_stats_top_validate() {
+    if string_empty "$WORD_STATS_TOP"; then
+
+        # Tries to get environment variable one last time before default used
+        if [ $1 == true ]; then
+            WORD_STATS_TOP=$(env | grep WORD_STATS_TOP | grep -i -o '[0-9]*')
+            word_stats_top_validate false
+            return
+        fi
+
+        export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
+        log "warn" "WORD_STATS_TOP: undefined (default :$WORD_STATS_TOP_DEFAULT)"
+    else
+        if is_number $WORD_STATS_TOP && ((WORD_STATS_TOP > 0)); then
+            log "info" "WORD_STATS_TOP: $WORD_STATS_TOP"
+        else
+            export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
+            log "warn" "WORD_STATS_TOP not valid. Default used ($WORD_STATS_TOP_DEFAULT)"
+        fi
+    fi
+}
+
 # Processes the t_mode function into a png plot.
 # If this function does not work it means you have change the code and don't know what you're doing.
 # Variables bellow must be correcly implemented as example
@@ -502,20 +527,8 @@ else
     touch "$OUTPUT_FILE"
 fi
 
-# Evaluates if Environment variable WORD_STATS_TOP is assigned
-#       If assigned then proceeds the normal execution
-#       Else warn pops up in console and a default is assigned by WORD_STATS_TOP_DEFAULT variable
-if string_empty "$WORD_STATS_TOP"; then
-    export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
-    log "warn" "WORD_STATS_TOP: undefined (default :$WORD_STATS_TOP_DEFAULT)"
-else
-    if is_number $WORD_STATS_TOP && ((WORD_STATS_TOP > 0)); then
-        log "info" "WORD_STATS_TOP: $WORD_STATS_TOP"
-    else
-        export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
-        log "warn" "WORD_STATS_TOP not valid. Default used ($WORD_STATS_TOP_DEFAULT)"
-    fi
-fi
+# WORD_STATS_TOP validation
+word_stats_top_validate 0
 
 #
 # ─────────────────────────────────────────────────────── COMPATIBILITY AREA ─────
