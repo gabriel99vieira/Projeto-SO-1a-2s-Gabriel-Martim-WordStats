@@ -292,6 +292,7 @@ word_stats_top_validate() {
 # ORIGINAL_INPUT=$FILE
 # OUTPUT_FILE="results/result---"
 plot() {
+    log "exec" "Creating plot..."
     # Defines path variables to working files
     GNU_PLOT_OUTPUT=$OUTPUT_FILE$GNU_PLOT_OUTPUT
     GNU_PLOT_OUTPUT_HTML=$OUTPUT_FILE$GNU_PLOT_OUTPUT_HTML
@@ -328,7 +329,7 @@ plot() {
         echo "set yrange [0:$_max_y]"
         echo "set grid ytics linestyle 1 linecolor rgb \"#e6e6e6\""
         echo "set key top"
-        echo "plot \"$OUTPUT_FILE\" using 1:2:xtic(3) with boxes title 'Occurrences' linecolor rgb \"#3399ff\""
+        echo "plot \"$OUTPUT_FILE\" using 1:2:xtic(3) with boxes title 'Occurrences' linecolor rgb \"#3399ff\", '' u 1:2:2 with labels title ''"
     } >"$GNU_PLOT_TEMP_FILE"
     unset stopwords
     unset _max_y
