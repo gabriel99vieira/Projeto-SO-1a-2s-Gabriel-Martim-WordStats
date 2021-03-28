@@ -295,6 +295,8 @@ plot() {
     # Defines path variables to working files
     GNU_PLOT_OUTPUT=$OUTPUT_FILE$GNU_PLOT_OUTPUT
     GNU_PLOT_OUTPUT_HTML=$OUTPUT_FILE$GNU_PLOT_OUTPUT_HTML
+    _max_y=$(cat $OUTPUT_FILE | head -1 | tr -s ' ' '\n' | tail -2 | head -1)
+    _max_y=$((_max_y + 2))
 
     # if temporary file not exists one is created
     if ! file_exists GNU_PLOT_TEMP_FILE; then
@@ -323,11 +325,13 @@ plot() {
         echo "set xtics rotate by -45"
         echo "set ylabel \"Quantity\" font \"bold\""
         # echo "set ytics 1"
+        echo "set yrange [0:$_max_y]"
         echo "set grid ytics linestyle 1 linecolor rgb \"#e6e6e6\""
         echo "set key top"
         echo "plot \"$OUTPUT_FILE\" using 1:2:xtic(3) with boxes title 'Occurrences' linecolor rgb \"#3399ff\""
     } >"$GNU_PLOT_TEMP_FILE"
     unset stopwords
+    unset _max_y
 
     # Creating the plot
     gnuplot <"$GNU_PLOT_TEMP_FILE"
