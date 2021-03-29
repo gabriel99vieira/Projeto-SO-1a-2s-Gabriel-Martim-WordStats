@@ -1,15 +1,47 @@
 #!/bin/bash
 
-# Scripted by
+#
+# ────────────────────────────────────────────────────────────── SCRIPTED BY ─────
+#
+
 # Gabriel Madeira Vieira - 2200661 - Student at IPL - ESTG - Computer Engineering
 # Martim Teixeira da Silva - 2200681 - Student at IPL - ESTG - Computer Engineering
 # Operative Systems Project
 
 #
+# ──────────────────────────────────────────── VISUAL STUDIO CODE EXTENSIONS ─────
+#
+
+# Name: BASH Extension Pack
+# Id: lizebang.bash-extension-pack
+# Description: BASH Extension Pack
+# Version: 0.0.4
+# Publisher: lizebang
+# VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=lizebang.bash-extension-pack
+
+# Name: Better Comments
+# Id: aaron-bond.better-comments
+# Description: Improve your code commenting by annotating with alert, informational, TODOs, and more!
+# Version: 2.1.0
+# Publisher: Aaron Bond
+# VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=aaron-bond.better-comments
+
+# Name: Comment V
+# Id: karyfoundation.comment
+# Description: The easiest way to to decorate your codes with Kary Comments in Visual Studio Code.
+# Version: 7.0.3
+# Publisher: Pouya Kary
+# VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=karyfoundation.comment
+
+#
+# ───────────────────────────────────────── END VISUAL STUDIO CODE EXTENSION ─────
+#
 
 #
 # ───────────────────────────────────────────────────────── GLOBAL VARIABLES ─────
 #
+
+AUTHORS=("Gabriel Vieira - 2200661" "Martim Silva - 2200681")
 
 # Input variables
 MODE=$1
@@ -43,7 +75,7 @@ ORIGINAL_INPUT=$FILE # NEVER! change this variable!
 
 # Output file variables
 OUTPUT_FILE="results/result---" # ? File prefix - later is changed to full path output
-OUTPUT_FILE_FORMAT="txt"        #
+OUTPUT_FILE_FORMAT="txt"
 OUTPUT_TEMP=".temp_out"
 
 # Allowed ISOs
@@ -101,6 +133,7 @@ is_number() {
         close
     fi
 
+    # Regex from https://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash
     if [[ $1 =~ ^[+-]?[0-9]+$ ]]; then
         return 0
 
@@ -117,6 +150,7 @@ is_capital_letter() {
         log "error" "Incorrect usage of 'is_capital_letter'. 1st argument required."
         close
     fi
+
     if [[ $1 =~ [A-Z] ]]; then
         return 0
     fi
@@ -127,6 +161,7 @@ is_capital_letter() {
 # ? USAGE: color "red|green|blue|yellow|cyan" # to change color
 # ? USAGE: color # to reset
 color() {
+    # color from https://stackoverflow.com/questions/9084257/bash-array-with-spaces-in-elements
     case "${1}" in
     "red")
         echo -e -n "\e[31m"
@@ -191,17 +226,19 @@ close() {
 }
 
 # Verifies if a value exists/is set in the array
-# ? USAGE: if in_array {parameter} in {array}; then ... fi
+# ? USAGE: if in_array ${parameter} in ${array}; then ... fi
 in_array() {
     if [ "$2" != in ]; then
         log "error" "Incorrect usage of 'in_array'. Correct usage: in_array {key} in {array}"
         close
     fi
+
     eval '[[ " ${'"$3"'[@]} " =~ " ${'"$1"'} " ]]'
+
 }
 
 # Verifies if a index exists/is set in the array
-# ? USAGE: if index_in_array {index} in {array}; then ... fi
+# ? USAGE: if index_in_array ${index} in {array}; then ... fi
 index_in_array() {
     if [ "$2" != in ]; then
         log "error" "Incorrect usage of 'index_in_array'. Correct usage: in_array {key} in {array}"
@@ -211,7 +248,11 @@ index_in_array() {
         log "error" "Incorrect usage of 'index_in_array'. 1st argument required."
         close
     fi
-    eval '[ ${'"$3"'[$1]} ]'
+    if [[ -v $3[$1] ]]; then
+        return 0
+    fi
+    return 1
+    # eval '[ ${'"$3"'[$1]} ]'
     # eval '[ '"$3"'["'"$1"'"] ]'
 }
 
@@ -244,12 +285,12 @@ print_preview() {
         log "error" "Incorrect usage of 'print_preview'. A file path must be passed as 1st parameter."
         return
     fi
-    re='^[0-9]+$'
+    local re='^[0-9]+$'
     if ! [[ $2 =~ $re ]]; then
         log "error" "Incorrect usage of 'print_preview'. A number must be passed as 2nd parameter."
         close
     fi
-    unset re
+
     eval 'head -$2 $1'
     if [ "$(wc -l <"$1")" -gt "$2" ]; then
         printf "\t\t%s" "(...)"
@@ -296,8 +337,25 @@ plot() {
     # Defines path variables to working files
     GNU_PLOT_OUTPUT=$OUTPUT_FILE$GNU_PLOT_OUTPUT
     GNU_PLOT_OUTPUT_HTML=$OUTPUT_FILE$GNU_PLOT_OUTPUT_HTML
-    _max_y=$(cat $OUTPUT_FILE | head -1 | tr -s ' ' '\n' | tail -2 | head -1)
+
+    local _max_y=$(cat $OUTPUT_FILE | head -1 | tr -s ' ' '\n' | tail -2 | head -1)
     _max_y=$((_max_y + 2))
+
+    local _date="$(date +'%A %B %Y %H:%M')"
+
+    local _authors=""
+    # from https://stackoverflow.com/questions/9084257/bash-array-with-spaces-in-elements
+    for ((i = 0; i < ${#AUTHORS[@]}; i++)); do
+        _authors="$_authors${AUTHORS[$i]}; "
+    done
+
+    # Processes the gnuplot commands and assigns them to the temporary file
+    local _stopwords=""
+    if is_capital_letter $MODE; then
+        _stopwords="No"
+    else
+        _stopwords="Yes ($ISO)"
+    fi
 
     # if temporary file not exists one is created
     if ! file_exists GNU_PLOT_TEMP_FILE; then
@@ -307,19 +365,12 @@ plot() {
     # Temporary file is emptied
     true >$GNU_PLOT_TEMP_FILE
 
-    # Processes the gnuplot commands and assigns them to the temporary file
-    stopwords=""
-    if is_capital_letter $MODE; then
-        stopwords="No"
-    else
-        stopwords="Yes ($ISO)"
-    fi
-
     {
-        echo "set title \"Top words for '$ORIGINAL_INPUT'\n$(date +'%A %B %Y %H:%M')\nStopwords: $stopwords\""
-        echo "set terminal png"
+        echo "set title \"Top words for $ORIGINAL_INPUT\n$_date\nStopwords: $_stopwords\""
+        echo "set term png size 800, 600"
         echo "set autoscale y"
         echo "set output \"$GNU_PLOT_OUTPUT\""
+
         echo "set boxwidth 0.6"
         echo "set style fill solid"
         echo "set xlabel \"Words\" font \"bold\""
@@ -329,10 +380,12 @@ plot() {
         echo "set yrange [0:$_max_y]"
         echo "set grid ytics linestyle 1 linecolor rgb \"#e6e6e6\""
         echo "set key top"
+
+        echo "set label 11 \"Authors: $_authors \nCreated: $(date +'%A %B %Y %H:%M')\" left at char 1, char 1.5 font \",10\""
+        echo "set bmargin 8"
+
         echo "plot \"$OUTPUT_FILE\" using 1:2:xtic(3) with boxes title 'Occurrences' linecolor rgb \"#3399ff\", '' u 1:2:2 with labels title ''"
     } >"$GNU_PLOT_TEMP_FILE"
-    unset stopwords
-    unset _max_y
 
     # Creating the plot
     gnuplot <"$GNU_PLOT_TEMP_FILE"
@@ -365,7 +418,7 @@ plot() {
 # OUTPUT_FILE="results/result---"
 c_mode() {
     # Checks what mode the user entered
-    cmd=""
+    local cmd=""
     if [ "$MODE" == "c" ]; then
         log "exec" "STOPWORDS FILTERED"
         # Saves command to filter the stopwords
@@ -379,7 +432,6 @@ c_mode() {
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
     split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
-    unset cmd
 
     echo
     echo "-------------------------------------"
@@ -397,7 +449,7 @@ c_mode() {
 # Same variables as 'c_mode' used
 t_mode() {
     # Checks what mode the user entered
-    cmd=""
+    local cmd=""
     if [ "$MODE" == "t" ]; then
         # Saves command to filter the stopwords
         cmd="sort | grep -w -v -i -f $STOP_WORDS_FILE"
@@ -411,8 +463,8 @@ t_mode() {
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
-    tmp_var=$(split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t')
-    dwords=$(wc -l <<<$tmp_var)
+    local tmp_var=$(split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t')
+    local dwords=$(wc -l <<<$tmp_var)
     sed -n 1,"$WORD_STATS_TOP"p <<<$tmp_var >$OUTPUT_FILE
 
     echo
@@ -426,9 +478,6 @@ t_mode() {
     ls -lah $OUTPUT_FILE
     log "exec" "Distinct words: $dwords"
 
-    unset cmd
-    unset tmp_var
-    unset dwords
 }
 
 # Uses the 't_mode' and then processes the plot using the 'plot' function
@@ -472,7 +521,7 @@ if string_empty "$FILE"; then
     close
 else
     extension="${FILE##*.}"
-    if index_in_array "$extension" in FILE_TYPES; then
+    if index_in_array $extension in FILE_TYPES; then
         if file_exists FILE; then
             # get file extension
             log "info" "Opening '$FILE' as ${FILE_TYPES[${extension}]} file."
@@ -495,9 +544,9 @@ else
 fi
 
 #
-# If it reaches here means that
-#       ISO is correct and enabled in the ISOS array
-#       File exists and its type is supported
+# ! If it reaches here means that
+# !      ISO is correct and enabled in the ISOS array
+# !      File exists and its type is supported
 #
 
 # Sets the STOP_WORDS_FILE path and checks its existance
