@@ -9,35 +9,6 @@
 # Operative Systems Project
 
 #
-# ──────────────────────────────────────────── VISUAL STUDIO CODE EXTENSIONS ─────
-#
-
-# Name: BASH Extension Pack
-# Id: lizebang.bash-extension-pack
-# Description: BASH Extension Pack
-# Version: 0.0.4
-# Publisher: lizebang
-# VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=lizebang.bash-extension-pack
-
-# Name: Better Comments
-# Id: aaron-bond.better-comments
-# Description: Improve your code commenting by annotating with alert, informational, TODOs, and more!
-# Version: 2.1.0
-# Publisher: Aaron Bond
-# VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=aaron-bond.better-comments
-
-# Name: Comment V
-# Id: karyfoundation.comment
-# Description: The easiest way to to decorate your codes with Kary Comments in Visual Studio Code.
-# Version: 7.0.3
-# Publisher: Pouya Kary
-# VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=karyfoundation.comment
-
-#
-# ───────────────────────────────────────── END VISUAL STUDIO CODE EXTENSION ─────
-#
-
-#
 # ───────────────────────────────────────────────────────── GLOBAL VARIABLES ─────
 #
 

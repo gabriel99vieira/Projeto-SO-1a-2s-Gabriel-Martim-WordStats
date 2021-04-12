@@ -80,6 +80,14 @@ stop_word_3
 
 * [gnuplot homepage (sourceforge.net)](http://gnuplot.sourceforge.net/) - Plot builder
 
+## Visual Studio Code Extensions
+
+ * BASH Extension Pack: https://marketplace.visualstudio.com/items?itemName=lizebang.bash-extension-pack
+
+ * Better Comments: https://marketplace.visualstudio.com/items?itemName=aaron-bond.better-comments
+
+ * Comment V: https://marketplace.visualstudio.com/items?itemName=karyfoundation.comment
+
 ## Authors
 
 * **Gabriel Madeira Vieira** - *Developer and documentation writter* - nº 2200661
