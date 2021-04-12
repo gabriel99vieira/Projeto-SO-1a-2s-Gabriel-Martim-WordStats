@@ -250,7 +250,7 @@ split_words() {
 }
 
 # Prints from a specific file the ammount of lines provided
-# USAGE: print_preview $FILE_PATH {int}
+# ? USAGE: print_preview $FILE_PATH {int}
 print_preview() {
     if string_empty "$1"; then
         log "error" "Incorrect usage of 'print_preview'. A file path must be passed as 1st parameter."
@@ -380,6 +380,24 @@ plot() {
     # display $GNU_PLOT_OUTPUT &
 }
 
+# Command pipe to remove and sort words from file
+# If the first value is a 0 Stopwords are removed else all are used
+# ? USAGE: query [0/1]
+query() {
+    local cmd=""
+    if (($1 == 0)); then
+        log "exec" "STOPWORDS FILTERED"
+        # Saves command to filter the stopwords
+        cmd="sort | grep -w -v -i -f $STOP_WORDS_FILE"
+    else
+        log "exec" "STOPWORDS IGNORED"
+        # Saves command without the grep to ignore Stopwords
+        cmd="sort"
+    fi
+
+    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
+}
+
 # Processes the $FILE and outputs the result to $OUTPUT_FILE
 # Uses the variables bellow as example
 # STOP_WORDS_FILE="stop_words.txt"
@@ -390,20 +408,14 @@ plot() {
 c_mode() {
     # Checks what mode the user entered
     local cmd=""
+    local lower=1
     if [ "$MODE" == "c" ]; then
-        log "exec" "STOPWORDS FILTERED"
-        # Saves command to filter the stopwords
-        cmd="sort | grep -w -v -i -f $STOP_WORDS_FILE"
-    elif [ "$MODE" == "C" ]; then
-        log "exec" "STOPWORDS IGNORED"
-        # Saves command without the grep to ignore Stopwords
-        cmd="sort"
+        lower=0
     fi
+    query lower
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
-    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
-
     echo
     echo "-------------------------------------"
     print_preview $OUTPUT_FILE $PREVIEW_LENGHT
@@ -421,22 +433,18 @@ c_mode() {
 t_mode() {
     # Checks what mode the user entered
     local cmd=""
+    local lower=1
     if [ "$MODE" == "t" ]; then
-        # Saves command to filter the stopwords
-        cmd="sort | grep -w -v -i -f $STOP_WORDS_FILE"
-        log "exec" "STOPWORDS FILTERED"
-    elif [ "$MODE" == "T" ]; then
-        # Saves command without the grep to ignore Stopwords
-        cmd="sort"
-        log "exec" "STOPWORDS IGNORED"
+        lower=0
     fi
-    log "exec" "WORD_STATS_TOP = $WORD_STATS_TOP"
+    query lower
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
-    local tmp_var=$(split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t')
+    local tmp_var=$(cat $OUTPUT_FILE)
     local dwords=$(wc -l <<<$tmp_var)
     sed -n 1,"$WORD_STATS_TOP"p <<<$tmp_var >$OUTPUT_FILE
+    log "exec" "WORD_STATS_TOP = $WORD_STATS_TOP"
 
     echo
     echo "-------------------------------------"
