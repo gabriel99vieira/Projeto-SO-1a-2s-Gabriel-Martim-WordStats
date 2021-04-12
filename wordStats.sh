@@ -395,6 +395,7 @@ query() {
         cmd="sort"
     fi
 
+    # Actual program. Yes... One line. 
     split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
 }
 
