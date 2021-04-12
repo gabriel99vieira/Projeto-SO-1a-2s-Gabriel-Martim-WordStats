@@ -402,7 +402,7 @@ c_mode() {
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
-    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
+    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
 
     echo
     echo "-------------------------------------"
@@ -434,7 +434,7 @@ t_mode() {
 
     # Results will be presented in a file
     # Prints PREVIEW_LENGHT to console
-    local tmp_var=$(split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | awk NF | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t')
+    local tmp_var=$(split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t')
     local dwords=$(wc -l <<<$tmp_var)
     sed -n 1,"$WORD_STATS_TOP"p <<<$tmp_var >$OUTPUT_FILE
 
