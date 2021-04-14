@@ -15,8 +15,6 @@ First of all make shure you have these if you are planning o using the PDF exten
 ```
 sudo apt install poppler-utils
 sudo apt install gnuplot
-sudo apt install libqt5core5a
-sudo apt install binutils
 ```
 
 ## How to use
