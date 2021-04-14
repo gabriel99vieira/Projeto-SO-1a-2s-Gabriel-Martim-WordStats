@@ -23,7 +23,7 @@ ISO=$3
 # Example pt.stop_words.txt
 STOP_WORDS_FILE="stop_words.txt"
 LANG_PATH="./StopWords"
-EXTRA_CHARS='.,]:«}#/»=\;"(*<>)|?{•–[-'
+EXTRA_CHARS='.,]:«}#/»=\;"(*<>)|?{•–['
 
 # Stopwords related variables
 # WORD_STATS_TOP=10 # !!! Changed to environment cariable (lines +-425)
@@ -388,7 +388,7 @@ query() {
     if (($1 == 0)); then
         log "exec" "STOPWORDS FILTERED"
         # Saves command to filter the stopwords
-        cmd="$cmd | grep -w -v -i -f $STOP_WORDS_FILE"
+        cmd="$cmd | grep -x -v -i -f $STOP_WORDS_FILE"
     else
         log "exec" "STOPWORDS IGNORED"
         # Saves command without the grep to ignore Stopwords
@@ -396,7 +396,7 @@ query() {
     fi
 
     # Actual program. Yes... One line.
-    split_words $FILE | sed -r 's/[-]+/\n/g' | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
+    split_words $FILE | sed -r 's/((\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g' | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
 }
 
 # Processes the $FILE and outputs the result to $OUTPUT_FILE
