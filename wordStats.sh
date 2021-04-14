@@ -397,7 +397,7 @@ query() {
 
     # Actual program. Yes... One line.
     # split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
-    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | awk NF | head -n -1 | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
+    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
 }
 
 # Processes the $FILE and outputs the result to $OUTPUT_FILE
