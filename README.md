@@ -55,10 +55,10 @@ These will have a distinct output based on the input file.
 If the input file is the same or has the same name then the output will be overwritten.
 The output follows the following pattern:
 
-* For all modes
+* All modes
 	* `result---{input_file_with_extension}.txt`
 	
-* For **p** mode
+* **p** mode
 	* `result---{input_file_with_extension}.html`
 	* `result---{input_file_with_extension}.png`
 

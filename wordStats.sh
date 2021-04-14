@@ -43,6 +43,7 @@ PREVIEW_LENGHT=10
 
 # Input variables
 ORIGINAL_INPUT=$FILE # NEVER! change this variable!
+FILE_LF=".temp_lf"   # For LF line break
 
 # Output file variables
 OUTPUT_FILE="results/result---" # ? File prefix - later is changed to full path output
@@ -68,12 +69,11 @@ FILE_TYPES["pdf"]="PDF"
 # Actions executed before closing script
 # This will be executed each time function 'close' is called
 before_close() {
-    # Removing the temporary PDF content file
-    rm -f $OUTPUT_TEMP
-    # Removing the temporary EOL LF file
-    rm -f $WORDS_LF
-    # Removing the temporary gnuplot configuration file
-    rm -f $GNU_PLOT_TEMP_FILE
+
+    rm -f $OUTPUT_TEMP        # Remove the temporary PDF content file
+    rm -f $WORDS_LF           # Remove the temporary words LF file
+    rm -f $GNU_PLOT_TEMP_FILE # Remove the temporary gnuplot configuration file
+    rm -f $FILE_LF            # Remove the temporary LF input file
 }
 
 # Returns true if provided string is empty
@@ -283,7 +283,7 @@ word_stats_top_validate() {
         fi
 
         export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
-        log "warn" "WORD_STATS_TOP: undefined (default :$WORD_STATS_TOP_DEFAULT)"
+        log "warn" "WORD_STATS_TOP: undefined (default: $WORD_STATS_TOP_DEFAULT)"
     else
         if is_number $WORD_STATS_TOP && ((WORD_STATS_TOP > 0)); then
             log "info" "WORD_STATS_TOP: $WORD_STATS_TOP"
@@ -384,19 +384,20 @@ plot() {
 # If the first value is a 0 Stopwords are removed else all are used
 # ? USAGE: query [0/1]
 query() {
-    local cmd=""
+    local cmd="sort"
     if (($1 == 0)); then
         log "exec" "STOPWORDS FILTERED"
         # Saves command to filter the stopwords
-        cmd="sort | grep -w -v -i -f $STOP_WORDS_FILE"
+        cmd="$cmd | grep -w -v -i -f $STOP_WORDS_FILE"
     else
         log "exec" "STOPWORDS IGNORED"
         # Saves command without the grep to ignore Stopwords
-        cmd="sort"
+        # cmd="$cmd | "
     fi
 
-    # Actual program. Yes... One line. 
-    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
+    # Actual program. Yes... One line.
+    # split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
+    split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | tr -s " " | awk NF | eval $cmd | awk NF | head -n -1 | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
 }
 
 # Processes the $FILE and outputs the result to $OUTPUT_FILE
@@ -580,6 +581,9 @@ touch $WORDS_LF
 tr -d '\015' <$STOP_WORDS_FILE >$WORDS_LF
 STOP_WORDS_FILE=$WORDS_LF
 
+tr -d '\015' <$FILE >$FILE_LF
+FILE=$FILE_LF
+
 #
 # ────────────────────────────────────────────────────────────── BEFORE CODE ─────
 #
@@ -594,7 +598,7 @@ unset extension
 #
 
 echo
-log "exec" "Processing '$FILE'"
+log "exec" "Processing '$ORIGINAL_INPUT'"
 
 # Simple case for each one of the modes
 case $MODE in
