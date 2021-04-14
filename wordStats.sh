@@ -384,7 +384,7 @@ plot() {
 # If the first value is a 0 Stopwords are removed else all are used
 # ? USAGE: query [0/1]
 query() {
-    local cmd="sort"
+    local cmd="sort --ignore-case"
     if (($1 == 0)); then
         log "exec" "STOPWORDS FILTERED"
         # Saves command to filter the stopwords
@@ -396,7 +396,6 @@ query() {
     fi
 
     # Actual program. Yes... One line.
-    # split_words $FILE | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
     split_words $FILE | sed -r 's/[-]+/\n/g' | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
 }
 
