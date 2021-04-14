@@ -355,7 +355,7 @@ plot() {
         echo "set label 11 \"Authors: $_authors \nCreated: $(date +'%A %B %Y %H:%M')\" left at char 1, char 1.5 font \",10\""
         echo "set bmargin 8"
 
-        echo "plot \"$OUTPUT_FILE\" using 1:2:xtic(3) with boxes title 'Occurrences' linecolor rgb \"#3399ff\", '' u 1:2:2 with labels title ''"
+        echo "plot \"$OUTPUT_FILE\" using 1:2:xtic(3) with boxes title 'Occurrences' linecolor rgb \"#3399ff\", '' u 1:(\$2+0.1):2 with labels offset 0,0.5 title ''"
     } >"$GNU_PLOT_TEMP_FILE"
 
     # Creating the plot
