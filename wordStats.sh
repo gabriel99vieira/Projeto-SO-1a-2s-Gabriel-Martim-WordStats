@@ -288,8 +288,8 @@ word_stats_top_validate() {
         if is_number $WORD_STATS_TOP && ((WORD_STATS_TOP > 0)); then
             log "info" "WORD_STATS_TOP: $WORD_STATS_TOP"
         else
+            log "warn" "WORD_STATS_TOP not valid ($WORD_STATS_TOP). Default used ($WORD_STATS_TOP_DEFAULT)"
             export WORD_STATS_TOP=$((WORD_STATS_TOP_DEFAULT))
-            log "warn" "WORD_STATS_TOP not valid. Default used ($WORD_STATS_TOP_DEFAULT)"
         fi
     fi
 }
