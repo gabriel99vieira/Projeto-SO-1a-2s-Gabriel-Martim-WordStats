@@ -241,18 +241,6 @@ file_exists() {
     eval '[[ -f "${'"$1"'}" ]]'
 }
 
-# Splits the content of a file in words
-# ? USAGE: split_words $FILE_PATH
-split_words() {
-    if string_empty "$1"; then
-        log "error" "Incorrect usage of 'split_words'. A file path must be passed."
-        close
-    fi
-    for word in $(cat $1); do
-        echo $word
-    done
-}
-
 # Prints from a specific file the ammount of lines provided
 # ? USAGE: print_preview $FILE_PATH {int}
 print_preview() {
@@ -401,7 +389,7 @@ query() {
     fi
 
     # Actual program. Yes... One line.
-    split_words $FILE | sed -r 's/((\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g' | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
+    cat $FILE | sed -r 's/((\ )|(\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g' | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
 }
 
 # Processes the $FILE and outputs the result to $OUTPUT_FILE
