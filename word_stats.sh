@@ -407,7 +407,8 @@ query() {
     local punct="sed -r 's/(\-)/«/g' | sed -r 's/(\.)/»/g' | tr -d \"[:punct:]\""
     punct="$punct | sed -r 's/(«)/-/g' | sed -r 's/(»)/./g'"
     punct="$punct | sed -r 's/(^(\.)|(\.)$|(\ \.)|(\ \. \ )|(\.\ ))/\n/g'"
-    punct="$punct | sed -r 's/((\ )|(\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g' | tr -d \"'«»•–\""
+    punct="$punct | sed -r 's/((\ )|(\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g'"
+    punct="$punct | tr -d \"'«»•–\" | sed -r 's/(^(\.)|(\.)$)/ /g'"
 
     # Actual program. Yes... One line.
     cat $FILE | eval $punct | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
