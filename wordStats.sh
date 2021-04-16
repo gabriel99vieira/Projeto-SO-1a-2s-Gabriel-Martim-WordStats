@@ -122,6 +122,7 @@ is_capital_letter() {
         close
     fi
 
+    # if capital
     if [[ $1 =~ [A-Z] ]]; then
         return 0
     fi
@@ -204,6 +205,9 @@ in_array() {
         close
     fi
 
+    # Concept from
+    # https://stackoverflow.com/questions/3685970/check-if-a-bash-array-contains-a-value
+    # https://stackoverflow.com/questions/13219634/easiest-way-to-check-for-an-index-or-a-key-in-an-array
     eval '[[ " ${'"$3"'[@]} " =~ " ${'"$1"'} " ]]'
 
 }
@@ -219,12 +223,11 @@ index_in_array() {
         log "error" "Incorrect usage of 'index_in_array'. 1st argument required."
         close
     fi
+    # from https://www.gnu.org/software/bash/manual/html_node/Bash-Conditional-Expressions.html
     if [[ -v $3[$1] ]]; then
         return 0
     fi
     return 1
-    # eval '[ ${'"$3"'[$1]} ]'
-    # eval '[ '"$3"'["'"$1"'"] ]'
 }
 
 # Verifies if a file exists
@@ -234,6 +237,7 @@ file_exists() {
         log "error" "Incorrect usage of 'file_exists'. 1st argument required."
         close
     fi
+    # from vscode extensions
     eval '[[ -f "${'"$1"'}" ]]'
 }
 
@@ -256,6 +260,7 @@ print_preview() {
         log "error" "Incorrect usage of 'print_preview'. A file path must be passed as 1st parameter."
         return
     fi
+    # is number
     local re='^[0-9]+$'
     if ! [[ $2 =~ $re ]]; then
         log "error" "Incorrect usage of 'print_preview'. A number must be passed as 2nd parameter."
