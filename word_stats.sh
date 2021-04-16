@@ -36,6 +36,10 @@ WORDS_LF=".temp_sw"
 GNU_PLOT_TEMP_FILE=".temp_plot"
 GNU_PLOT_OUTPUT=".png"
 GNU_PLOT_OUTPUT_HTML=".html"
+GNU_PLOT_MIN_WIDTH=1366
+GNU_PLOT_MIN_HEIGHT=768
+GNU_PLOT_UPSCALE_FACTOR=0.8 # ! Set always in floating point
+GNU_PLOT_UPSCALE_START=50
 
 # Default preview lenght when WORD_STATS_TOP isn't used for the required mode
 PREVIEW_LENGHT=10
@@ -330,15 +334,17 @@ plot() {
     true >$GNU_PLOT_TEMP_FILE
 
     # Change the image file depending on the results
+    # Calc from https://unix.stackexchange.com/questions/40786/how-to-do-integer-float-calculations-in-bash-or-other-languages-frameworks
     local results=$(wc -l <$OUTPUT_FILE)
-    local size="1024, 768"
-    if (($results >= 60)); then
-        if (($results >= 100)); then
-            size="1920, 1080"
-        else
-            size="1366, 768"
-        fi
+    local w_size=$GNU_PLOT_MIN_WIDTH
+    local h_size=$GNU_PLOT_MIN_HEIGHT
+    local s_factor="$(awk "BEGIN {print ($GNU_PLOT_UPSCALE_FACTOR * 10)}")"
+    s_factor="$(awk "BEGIN {print (($results * $s_factor))}")"
+    if (($results >= $GNU_PLOT_UPSCALE_START)); then
+        w_size=$(($s_factor + $GNU_PLOT_MIN_WIDTH))
+        h_size=$(awk "BEGIN {print (($GNU_PLOT_MIN_HEIGHT / $GNU_PLOT_MIN_WIDTH) * $w_size)}")
     fi
+    local size="$w_size, ${h_size%.*}"
 
     {
         echo "set title \"$results top words for $ORIGINAL_INPUT\n$_date\nStopwords: $_stopwords\""
