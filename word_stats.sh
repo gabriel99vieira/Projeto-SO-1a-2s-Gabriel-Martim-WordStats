@@ -389,8 +389,16 @@ query() {
         # cmd="$cmd | "
     fi
 
+    # By steps
+    # Removing punctuation
+    # Subtitute - and . with with « and » respectively because those are removed later
+    # With this we can have words like "sentar-se" and "file.txt"
+    local punct="sed -r 's/(\-)/«/g' | sed -r 's/(\.)/»/g' | tr -d \"[:punct:]\""
+    punct="$punct | sed -r 's/(«)/-/g' | sed -r 's/(»)/./g'"
+    punct="$punct | sed -r 's/((\ )|(\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g' | tr -d \"'«»•–\""
+
     # Actual program. Yes... One line.
-    cat $FILE | sed -r 's/(\-)/«/g' | tr -d "[:punct:]" | sed -r 's/(«)/-/g' | sed -r 's/((\ )|(\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g' | tr -d "'«»•–" | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
+    cat $FILE | eval $punct | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
 }
 
 # Processes the $FILE and outputs the result to $OUTPUT_FILE
