@@ -330,9 +330,20 @@ plot() {
     # Temporary file is emptied
     true >$GNU_PLOT_TEMP_FILE
 
+    # Change the image file depending on the results
+    local results=$(wc -l <$OUTPUT_FILE)
+    local size="1024, 768"
+    if (($results >= 60)); then
+        if (($results >= 100)); then
+            size="1920, 1080"
+        else
+            size="1366, 768"
+        fi
+    fi
+
     {
-        echo "set title \"Top words for $ORIGINAL_INPUT\n$_date\nStopwords: $_stopwords\""
-        echo "set term png size 800, 600"
+        echo "set title \"$results top words for $ORIGINAL_INPUT\n$_date\nStopwords: $_stopwords\""
+        echo "set term png size $size"
         echo "set autoscale y"
         echo "set output \"$GNU_PLOT_OUTPUT\""
 
@@ -395,6 +406,7 @@ query() {
     # With this we can have words like "sentar-se" and "file.txt"
     local punct="sed -r 's/(\-)/«/g' | sed -r 's/(\.)/»/g' | tr -d \"[:punct:]\""
     punct="$punct | sed -r 's/(«)/-/g' | sed -r 's/(»)/./g'"
+    punct="$punct | sed -r 's/(^(\.)|(\.)$|(\ \.)|(\ \. \ )|(\.\ ))/\n/g'"
     punct="$punct | sed -r 's/((\ )|(\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g' | tr -d \"'«»•–\""
 
     # Actual program. Yes... One line.
