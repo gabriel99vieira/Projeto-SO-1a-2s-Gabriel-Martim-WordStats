@@ -401,7 +401,6 @@ query() {
 # OUTPUT_FILE="results/result---"
 c_mode() {
     # Checks what mode the user entered
-    local cmd=""
     local lower=1
     if [ "$MODE" == "c" ]; then
         lower=0
@@ -426,7 +425,6 @@ c_mode() {
 # Same variables as 'c_mode' used
 t_mode() {
     # Checks what mode the user entered
-    local cmd=""
     local lower=1
     if [ "$MODE" == "t" ]; then
         lower=0
@@ -450,7 +448,6 @@ t_mode() {
     log "exec"
     ls -lah $OUTPUT_FILE
     log "exec" "Distinct words: $dwords"
-
 }
 
 # Uses the 't_mode' and then processes the plot using the 'plot' function
