@@ -537,7 +537,7 @@ fi
 
 #
 # ! If it reaches here means that
-# !      ISO is correct and enabled in the ISOS array
+# !      ISO is correct and exists in the ISOS array
 # !      File exists and its type is supported
 #
 
