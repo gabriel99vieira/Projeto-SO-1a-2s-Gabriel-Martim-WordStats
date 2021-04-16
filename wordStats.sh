@@ -52,6 +52,7 @@ OUTPUT_TEMP=".temp_out"
 
 # Allowed ISOs
 ISOS=("pt" "en")
+DEFAULT_ISO="en"
 
 # Allowed output modes
 MODES=("c" "C" "t" "T" "p" "P")
@@ -488,6 +489,7 @@ fi
 # Check if file exists (and different than "") and the extension is allowed/supported
 if string_empty "$FILE"; then
     log "error" "File not provided."
+    log "error" "Example: ./$(basename $0) c ./samples/test.txt $DEFAULT_ISO"
     close
 else
     extension="${FILE##*.}"
@@ -509,7 +511,7 @@ fi
 if in_array ISO in ISOS; then
     log "info" "ISO format: '$ISO'."
 else
-    ISO="en"
+    ISO=$DEFAULT_ISO
     log "warn" "ISO not defined. Default will be used ('$ISO')."
 fi
 
