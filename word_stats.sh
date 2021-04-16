@@ -22,7 +22,7 @@ ISO=$3
 # StopWords files
 # Example pt.stop_words.txt
 STOP_WORDS_FILE="stop_words.txt"
-LANG_PATH="./StopWords"
+LANG_PATH="./stop_words"
 EXTRA_CHARS='.,]:«}#/»=\;"(*<>)|?{•–['
 
 # Stopwords related variables
@@ -390,7 +390,7 @@ query() {
     fi
 
     # Actual program. Yes... One line.
-    cat $FILE | sed -r 's/((\ )|(\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g' | tr -d "'" | tr -d "$EXTRA_CHARS" | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
+    cat $FILE | sed -r 's/(\-)/«/g' | tr -d "[:punct:]" | sed -r 's/(«)/-/g' | sed -r 's/((\ )|(\ \-\ )|(\ \-)|(\-\ )|^(\-)|(\-)$)/\n/g' | tr -d "'«»•–" | eval $cmd | awk NF | uniq -c -i | sort -rn | cat -n | tr -d '\t' >$OUTPUT_FILE
 }
 
 # Processes the $FILE and outputs the result to $OUTPUT_FILE
@@ -398,7 +398,6 @@ query() {
 # STOP_WORDS_FILE="stop_words.txt"
 # WORD_STATS_TOP=$(printenv WORD_STATS_TOP)
 # FILE=$2   # ? 2rd argument on user input when script called
-# EXTRA_CHARS='.,]:«}#/»=\;"(*<>)|?{•–[-'
 # OUTPUT_FILE="results/result---"
 c_mode() {
     # Checks what mode the user entered
