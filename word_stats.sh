@@ -23,7 +23,6 @@ ISO=$3
 # Example pt.stop_words.txt
 STOP_WORDS_FILE="stop_words.txt"
 LANG_PATH="./stop_words"
-EXTRA_CHARS='.,]:«}#/»=\;"(*<>)|?{•–['
 
 # Stopwords related variables
 # WORD_STATS_TOP=10 # !!! Changed to environment cariable (lines +-425)
