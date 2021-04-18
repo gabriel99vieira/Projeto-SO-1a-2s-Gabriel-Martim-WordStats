@@ -392,7 +392,7 @@ plot() {
 
 # Command pipe to remove and sort words from file
 # If the first value is a 0 Stopwords are removed else all are used
-# ? USAGE: query [0/1]
+# ? USAGE: query {0/1}
 query() {
     local cmd="sort --ignore-case"
     if (($1 == 0)); then
